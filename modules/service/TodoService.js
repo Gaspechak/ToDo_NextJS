@@ -40,9 +40,8 @@ const handleRemove = async (reqParams) => {
         data: {}
     }
 
-    const todoId = parseInt(reqParams.query.id)
-
     try {
+        const todoId = parseInt(reqParams.query.id)
         const removedObj = await remove(todoId)
         result.data = removedObj
     } catch (error) {
