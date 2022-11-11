@@ -14,7 +14,7 @@
         ".vscode": true,
         ".eslintrc.json": true,
         "next.config.js": true,
-        "jsconfig.json": true,
+        "jsconfig.json": false,
         "yarn.lock": true,
         ".gitignore": true,
         "**/.gitignore": true
