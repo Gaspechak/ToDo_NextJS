@@ -61,7 +61,7 @@ const handleGet = async () => {
     try {
         const todoList = await listAll()
         if (todoList.length == 0) {
-            result.status = 204
+            result.data = []
         } else {
             result.data = todoList
         }
