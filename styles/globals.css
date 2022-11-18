@@ -1,6 +1,7 @@
 html,
 body {
     font-family: Arial, Helvetica, sans-serif;
+    background-color: #E5E7E6;
 }
 
 .todo-form {
@@ -25,6 +26,7 @@ body {
 }
 
 .list-item {
+    background-color: #fff;
     padding: 0.5em;
     margin-bottom: 6px;
     display: flex;
@@ -35,7 +37,62 @@ body {
     border-radius: 2px;
 }
 
+.remove-button {
+    width: 20px;
+    color: #B80C09;
+}
+
+.remove-button:hover {
+    color: red;
+}
+
+.done {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.done>div {
+    text-decoration: line-through;
+    color: #666;
+}
+
 .list-item:hover {
     cursor: pointer;
     box-shadow: 0px 10px 16px -2px rgba(0, 0, 0, 0.1);
+}
+
+.content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    flex: 1;
+    max-width: 50em;
+}
+
+.input-group {
+    display: flex;
+    align-content: stretch;
+}
+
+.input-group>input {
+    flex: 1 0 auto;
+}
+
+.add-button {
+    color: #379237;
+    border-radius: 2px;
+    padding: 0.45em;
+    margin-left: 0.5em;
+    font-size: 1em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #333;
+    border-radius: 2px;
+}
+
+.add-button :hover {
+    cursor: pointer;
 }
