@@ -1,6 +1,9 @@
 import Head from 'next/head'
 import useSWR from 'swr'
 import TodoForm from 'components/TodoForm';
+import TodoDialog from 'components/TodoDialog';
+import { useState, React } from 'react';
+
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json())
 
@@ -14,8 +17,6 @@ const removeTodo = (todoId) => {
 }
 
 const updateTodo = (todo) => {
-  todo.done = !todo.done;
-
   fetch('/api/todos', {
     method: 'PUT',
     headers: {
@@ -25,11 +26,22 @@ const updateTodo = (todo) => {
   })
 }
 
-const tableRowItem = (item) => {
+const itemChecked = (e, item) => {
+  e.stopPropagation()
+  item.done = !item.done;
+  updateTodo(item);
+}
+
+const openDialog = (item, setIsOpen, setSelectedObj) => {
+  setIsOpen(true)
+  setSelectedObj(item)
+}
+
+const tableRowItem = (item, setIsOpen, setSelectedObj) => {
   return (
-    <div key={item.id} className={`list-item ${item.done ? 'done' : ''}`}>
-      <input type="checkbox" checked={item.done} onChange={() => updateTodo(item)} />
-      
+    <div key={item.id} className={`list-item ${item.done ? 'done' : ''}`} onClick={() => openDialog(item, setIsOpen, setSelectedObj)}>
+      <input type="checkbox" checked={item.done} onClick={(e) => itemChecked(e, item)} onChange={() => { }} />
+
       <div>{item.title}</div>
 
       <svg className="remove-button" onClick={() => removeTodo(item.id)} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -43,6 +55,9 @@ const tableRowItem = (item) => {
 export default function Home() {
 
   const { data, error } = useSWR('/api/todos', fetcher, { refreshInterval: 10 })
+
+  const [isOpen, setIsOpen] = useState(false)
+  const [selectedObj, setSelectedObj] = useState({})
 
   if (error) return <div>Failed to Load</div>
   if (!data) return <div>Loading...</div>
@@ -58,9 +73,11 @@ export default function Home() {
         <TodoForm />
 
         <div className='list'>
-          {data.map((item) => tableRowItem(item))}
+          {data.map((item) => tableRowItem(item, setIsOpen, setSelectedObj))}
         </div>
       </div>
+
+      <TodoDialog title="Editar tarefa" isOpen={isOpen} setIsOpen={setIsOpen} item={selectedObj} />
 
     </div>
   )
