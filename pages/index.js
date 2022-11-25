@@ -55,7 +55,7 @@ const tableRowItem = (item, setIsOpen, setSelectedObj) => {
 
 export default function Home() {
 
-  const { data, error } = useSWR('/api/todos', fetcher, { refreshInterval: 10 })
+  const { data, error } = useSWR('/api/todos', fetcher)
 
   const [isOpen, setIsOpen] = useState(false)
   const [selectedObj, setSelectedObj] = useState({})
