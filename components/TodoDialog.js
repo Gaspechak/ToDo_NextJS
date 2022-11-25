@@ -1,19 +1,29 @@
 import { useState, useEffect } from 'react';
+import { useSWRConfig } from 'swr'
 
-const updateTodo = (title, description, id) => {
-    const todo = { id, title, description }
+const updateTodo = (title, description, id, mutate) => {
+    mutate('/api/todos', async todos => {
+        const todo = { id, title, description }
 
-    fetch('/api/todos', {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(todo)
+        let result = await fetch('/api/todos', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(todo)
+        })
+
+        let updatedTodo = await result.json()
+        let index = todos.map((i) => { return i.id }).indexOf(id)
+        todos[index] = updatedTodo;
+        return todos;
     })
+
 }
 
 export default function TodoDialog(props) {
     const { title, description } = props.item;
+    const { mutate } = useSWRConfig()
 
     const [inputTitle, setInputTitle] = useState("")
     const [inputDescription, setInputDescription] = useState("")
@@ -37,7 +47,7 @@ export default function TodoDialog(props) {
                             <textarea className='description-input' type="text" placeholder="Descrição" value={inputDescription} onChange={e => setInputDescription(e.target.value)} />
                             <div className="action-buttons">
                                 <button onClick={() => {
-                                    updateTodo(inputTitle, inputDescription, props.item.id)
+                                    updateTodo(inputTitle, inputDescription, props.item.id, mutate)
                                     props.setIsOpen(false)
                                 }}>Salvar</button>
                             </div>
