@@ -3,7 +3,7 @@ import useSWR, { useSWRConfig } from 'swr'
 import TodoForm from 'components/TodoForm';
 import TodoDialog from 'components/TodoDialog';
 import { useState, React } from 'react';
-import { Container, Row, Col, ListGroup, Stack, Form, Button } from 'react-bootstrap'
+import { Container, Row, Col, ListGroup, Stack, Form, Button, Modal } from 'react-bootstrap'
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json())
 
@@ -22,7 +22,6 @@ const removeTodo = (e, todoId, mutate) => {
 }
 
 const updateTodo = (todo, mutate) => {
-  todo.done = !todo.done;
   mutate('/api/todos', async todos => {
     let result = await fetch('/api/todos', {
       method: 'PUT',
@@ -43,17 +42,20 @@ const openDialog = (item, setIsOpen, setSelectedObj) => {
   setSelectedObj(item)
 }
 
-const tableRowItem = (item, setIsOpen, setSelectedObj, mutate) => {
+const tableRowItem = (item, handleItemClick, mutate) => {
   return (
     <>
-      <ListGroup.Item key={item.id} variant={item.done && "success"}>
+      <ListGroup.Item key={item.id} variant={item.done && "success"} onClick={() => handleItemClick(item)}>
         <Stack direction='horizontal' gap={2}>
           <div className='me-auto'>
             <Form.Check
               checked={item.done}
-              onChange={() => {
+              onClick={(e) => {
+                e.stopPropagation();
+                item.done = !item.done;
                 updateTodo(item, mutate)
               }}
+              onChange={() => { }}
               type="switch" />
           </div>
           <div className='me-auto'>{item.title}</div>
@@ -69,8 +71,21 @@ export default function Home() {
   const { mutate } = useSWRConfig()
   const { data, error } = useSWR('/api/todos', fetcher)
 
-  const [isOpen, setIsOpen] = useState(false)
+  const [show, setShow] = useState(false);
+
+  const [inputTitle, setInputTitle] = useState("")
+  const [inputDescription, setInputDescription] = useState("")
   const [selectedObj, setSelectedObj] = useState({})
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+  const handleItemClick = (item) => {
+    setSelectedObj(item)
+    handleShow()
+    setInputDescription(item.description)
+    setInputTitle(item.title)
+  }
 
   if (error) return <div>Failed to Load</div>
   if (!data) return <div>Loading...</div>
@@ -86,12 +101,44 @@ export default function Home() {
           <Col>
             <ListGroup>
               {
-                data.map((item) => tableRowItem(item, setIsOpen, setSelectedObj, mutate))
+                data.map((item) => tableRowItem(item, handleItemClick, mutate))
               }
             </ListGroup>
           </Col>
         </Row>
       </Container>
+
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Editar tarefa</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <Form onSubmit={(e) => {e.preventDefault()}}>
+            <Form.Group className="mb-3">
+              <Form.Label>Título da Tarefa</Form.Label>
+              <Form.Control type="text" value={inputTitle} onChange={(e) => setInputTitle(e.target.value)} />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Descrição da tarefa</Form.Label>
+              <Form.Control as="textarea" rows={4} value={inputDescription} onChange={(e) => setInputDescription(e.target.value)} />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button type="button" variant='success' onClick={() => {
+            selectedObj.title = inputTitle
+            selectedObj.description = inputDescription
+            updateTodo(selectedObj, mutate)
+            setInputDescription("")
+            setInputTitle("")
+            handleClose()
+          }}>
+            Salvar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   )
 }
